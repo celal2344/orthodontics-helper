@@ -2,7 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@orthodontics-helper/constants", "@orthodontics-helper/i18n"],
+  transpilePackages: [
+    "@orthodontics-helper/api-client",
+    "@orthodontics-helper/constants",
+    "@orthodontics-helper/i18n",
+  ],
 };
 
 export default nextConfig;

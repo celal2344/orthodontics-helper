@@ -1,0 +1,21 @@
+{
+  "name": "@orthodontics-helper/api-client",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "dev": "tsc --noEmit --watch",
+    "generate": "npx openapi-typescript@7.13.0 ../../apps/api/internal/platform/openapi/openapi.yaml -o src/schema.ts",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@orthodontics-helper/i18n": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}

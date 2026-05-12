@@ -37,6 +37,15 @@
         "typescript": "5.8.3",
       },
     },
+    "packages/api-client": {
+      "name": "@orthodontics-helper/api-client",
+      "dependencies": {
+        "@orthodontics-helper/i18n": "workspace:*",
+      },
+      "devDependencies": {
+        "typescript": "5.8.3",
+      },
+    },
     "packages/constants": {
       "name": "@orthodontics-helper/constants",
       "devDependencies": {
@@ -210,6 +219,8 @@
     "@nodelib/fs.walk": ["@nodelib/fs.walk@1.2.8", "", { "dependencies": { "@nodelib/fs.scandir": "2.1.5", "fastq": "^1.6.0" } }, "sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg=="],
 
     "@nolyfill/is-core-module": ["@nolyfill/is-core-module@1.0.39", "", {}, "sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA=="],
+
+    "@orthodontics-helper/api-client": ["@orthodontics-helper/api-client@workspace:packages/api-client"],
 
     "@orthodontics-helper/constants": ["@orthodontics-helper/constants@workspace:packages/constants"],
 
