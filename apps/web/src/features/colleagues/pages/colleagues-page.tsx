@@ -1,83 +1,28 @@
+"use client";
+
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-const colleagues = [
-  {
-    id: "user_1",
-    name: "Dr. Deniz Aydin",
-    email: "deniz@example.com",
-    clinic: "Ortodonti Klinik",
-    joinedAt: "02 Jan 2026",
-    status: "active",
-  },
-  {
-    id: "user_2",
-    name: "Dr. Selin Koc",
-    email: "selin@example.com",
-    clinic: "Ortodonti Klinik",
-    joinedAt: "18 Feb 2026",
-    status: "active",
-  },
-];
+import { useClinicContext } from "@/features/auth/components/clinic-context-provider";
+import { ColleaguesError, ColleaguesLoading } from "@/features/colleagues/components/colleagues-state";
+import { ColleaguesTable } from "@/features/colleagues/components/colleagues-table";
+import { useColleagues } from "@/features/colleagues/hooks/use-colleagues";
 
 export function ColleaguesPage() {
+  const { clinic } = useClinicContext();
+  const colleaguesQuery = useColleagues();
+
   return (
     <AppShell currentPath="/colleagues">
       <PageHeader
-        description="Doctors attached to the active clinic."
+        description={`Doctors attached to ${clinic.name}.`}
         title="Colleagues"
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Clinic members</CardTitle>
-          <CardDescription>{colleagues.length} active doctors</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Doctor name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Clinic</TableHead>
-                  <TableHead>Joined date</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {colleagues.map((colleague) => (
-                  <TableRow key={colleague.id}>
-                    <TableCell className="font-medium">{colleague.name}</TableCell>
-                    <TableCell>{colleague.email}</TableCell>
-                    <TableCell>{colleague.clinic}</TableCell>
-                    <TableCell>{colleague.joinedAt}</TableCell>
-                    <TableCell>
-                      <Badge>{colleague.status}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      {colleaguesQuery.isLoading ? <ColleaguesLoading /> : null}
+      {colleaguesQuery.isError ? <ColleaguesError /> : null}
+      {colleaguesQuery.data ? (
+        <ColleaguesTable colleagues={colleaguesQuery.data} />
+      ) : null}
     </AppShell>
   );
 }
