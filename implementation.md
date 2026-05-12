@@ -152,8 +152,8 @@ Completion criteria:
 3. `apps/api` folder skeleton and backend README. - Completed in `f994593`.
 4. Shared constants and i18n placeholders. - Completed in `64eea51`.
 5. Initial SQL migration and schema rules. - Completed in `135ce05`.
-6. OpenAPI spec v1 and API client package. - In progress.
-7. Auth shell and clinic context.
+6. OpenAPI spec v1 and API client package. - Completed in `138e0fd`.
+7. Auth shell and clinic context. - In progress.
 8. Colleagues page.
 9. Patient backend scaffold.
 10. Patient table and modal.

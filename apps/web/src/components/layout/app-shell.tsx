@@ -7,6 +7,7 @@ import {
   Settings,
   UsersRound,
 } from "lucide-react";
+import { ClinicStatus } from "@/features/auth/components/clinic-status";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -56,12 +57,19 @@ export function AppShell({
             );
           })}
         </nav>
+
+        <div className="mt-auto">
+          <ClinicStatus />
+        </div>
       </aside>
 
       <div className="lg:pl-64">
         <header className="sticky top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur md:px-6 lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-semibold">Orthodontics Helper</p>
+            <div className="hidden min-w-0 flex-1 justify-end sm:flex">
+              <ClinicStatus />
+            </div>
             <nav className="flex items-center gap-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
