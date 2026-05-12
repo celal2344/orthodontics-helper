@@ -27,3 +27,17 @@ go run ./cmd/api send-daily-reminders
 ```
 
 Railway should run the API service with `./app server` and the daily cron service with `./app send-daily-reminders`.
+
+## Database
+
+Supabase migration files live in:
+
+```txt
+apps/api/supabase/migrations
+```
+
+Create new migrations with:
+
+```bash
+supabase migration new <name> --workdir apps/api
+```

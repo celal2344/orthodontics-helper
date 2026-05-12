@@ -150,8 +150,8 @@ Completion criteria:
 1. Root workspace, Turbo, Bun scripts, and durable plan. - Completed in `4641826`.
 2. `apps/web` scaffold and base UI shell. - Completed in `dd01365`.
 3. `apps/api` folder skeleton and backend README. - Completed in `f994593`.
-4. Shared constants and i18n placeholders. - In progress.
-5. Initial SQL migration and schema rules.
+4. Shared constants and i18n placeholders. - Completed in `64eea51`.
+5. Initial SQL migration and schema rules. - In progress.
 6. OpenAPI spec v1 and API client package.
 7. Auth shell and clinic context.
 8. Colleagues page.
@@ -175,3 +175,7 @@ Completion criteria:
 - Confirm where Go compile/deploy validation will happen.
 
 For now, implementation proceeds OpenAPI-first with backend scaffolding and frontend client boundaries.
+
+## Validation Notes
+
+- `supabase migration list --local --workdir apps/api` currently fails because no local Supabase Postgres is running on `127.0.0.1:54322`.
