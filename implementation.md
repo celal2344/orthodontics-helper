@@ -154,8 +154,8 @@ Completion criteria:
 5. Initial SQL migration and schema rules. - Completed in `135ce05`.
 6. OpenAPI spec v1 and API client package. - Completed in `138e0fd`.
 7. Auth shell and clinic context. - Completed in `b0e1ca5`.
-8. Colleagues page. - In progress.
-9. Patient backend scaffold.
+8. Colleagues page. - Completed in `ea2d5c2`.
+9. Patient backend scaffold. - Next.
 10. Patient table and modal.
 11. Patient audit and soft delete scaffolding.
 12. Appointment backend scaffold.
