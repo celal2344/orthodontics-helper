@@ -147,8 +147,8 @@ Completion criteria:
 
 ## Commit Sequence
 
-1. Root workspace, Turbo, Bun scripts, and durable plan.
-2. `apps/web` scaffold and base UI shell.
+1. Root workspace, Turbo, Bun scripts, and durable plan. - Completed in `4641826`.
+2. `apps/web` scaffold and base UI shell. - In progress.
 3. `apps/api` folder skeleton and backend README.
 4. Shared constants and i18n placeholders.
 5. Initial SQL migration and schema rules.
