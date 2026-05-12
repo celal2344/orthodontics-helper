@@ -149,8 +149,8 @@ Completion criteria:
 
 1. Root workspace, Turbo, Bun scripts, and durable plan. - Completed in `4641826`.
 2. `apps/web` scaffold and base UI shell. - Completed in `dd01365`.
-3. `apps/api` folder skeleton and backend README. - In progress.
-4. Shared constants and i18n placeholders.
+3. `apps/api` folder skeleton and backend README. - Completed in `f994593`.
+4. Shared constants and i18n placeholders. - In progress.
 5. Initial SQL migration and schema rules.
 6. OpenAPI spec v1 and API client package.
 7. Auth shell and clinic context.

@@ -1,0 +1,17 @@
+{
+  "name": "@orthodontics-helper/constants",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "dev": "tsc --noEmit --watch",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}
