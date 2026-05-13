@@ -2,7 +2,7 @@
 
 import type { Colleague, Patient } from "@orthodontics-helper/api-client";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useI18n } from "@/components/layout/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,8 +69,8 @@ export function ColleaguesTable({
                 const isOpen = openDoctorId === colleague.id;
 
                 return (
-                  <>
-                    <TableRow key={colleague.id}>
+                  <Fragment key={colleague.id}>
+                    <TableRow>
                       <TableCell>
                         <Button
                           aria-label={t(
@@ -104,7 +104,7 @@ export function ColleaguesTable({
                       </TableCell>
                     </TableRow>
                     {isOpen ? (
-                      <TableRow key={`${colleague.id}-stats`}>
+                      <TableRow>
                         <TableCell colSpan={8}>
                           {assignedPatients.length > 0 ? (
                             <div className="flex flex-col gap-3 rounded-md bg-secondary/30 p-3">
@@ -130,7 +130,7 @@ export function ColleaguesTable({
                         </TableCell>
                       </TableRow>
                     ) : null}
-                  </>
+                  </Fragment>
                 );
               })}
             </TableBody>
