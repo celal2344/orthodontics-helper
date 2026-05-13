@@ -21,7 +21,7 @@ packages/
 - Node.js
 - Go, for backend compile/run validation
 
-Go is not currently available in this workspace, so backend code is scaffolded but not locally compiled yet.
+Go is installed in this workspace through Scoop and backend validation passes.
 
 ## Commands
 
@@ -34,3 +34,12 @@ bun run build
 ```
 
 Root scripts delegate to Turborepo. Package-specific task logic should live in each package.
+
+Backend validation:
+
+```bash
+cd apps/api
+go test ./...
+go vet ./...
+go build ./cmd/api
+```

@@ -15,6 +15,8 @@ type PatientResponse struct {
 	FullName        string `json:"fullName"`
 	Phone           string `json:"phone"`
 	Status          string `json:"status"`
+	TreatmentNote   string `json:"treatmentNote,omitempty"`
+	InternalNote    string `json:"internalNote,omitempty"`
 	NextAppointment string `json:"nextAppointment,omitempty"`
 	UpdatedAt       string `json:"updatedAt"`
 }

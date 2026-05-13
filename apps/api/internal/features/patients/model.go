@@ -15,4 +15,5 @@ type Patient struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       *time.Time
+	NextAppointment *time.Time
 }

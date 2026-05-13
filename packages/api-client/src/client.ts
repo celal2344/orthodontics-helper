@@ -30,9 +30,18 @@ export class ApiClientError extends Error {
 
 export class ApiClient {
   private baseUrl: string;
+  private defaultHeaders: HeadersInit;
 
-  constructor(baseUrl: string) {
+  constructor(baseUrl: string, defaultHeaders: HeadersInit = {}) {
     this.baseUrl = baseUrl.replace(/\/$/, "");
+    this.defaultHeaders = defaultHeaders;
+  }
+
+  withHeaders(defaultHeaders: HeadersInit) {
+    return new ApiClient(this.baseUrl, {
+      ...this.defaultHeaders,
+      ...defaultHeaders,
+    });
   }
 
   getCurrentUser() {
@@ -58,6 +67,23 @@ export class ApiClient {
     return this.request<Patient>("/v1/patients", {
       method: "POST",
       body: JSON.stringify(input),
+    });
+  }
+
+  getPatient(id: string) {
+    return this.request<Patient>(`/v1/patients/${id}`);
+  }
+
+  updatePatient(id: string, input: PatientInput) {
+    return this.request<Patient>(`/v1/patients/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  }
+
+  deletePatient(id: string) {
+    return this.request<void>(`/v1/patients/${id}`, {
+      method: "DELETE",
     });
   }
 
@@ -97,6 +123,7 @@ export class ApiClient {
       ...init,
       headers: {
         "Content-Type": "application/json",
+        ...this.defaultHeaders,
         ...init.headers,
       },
     });

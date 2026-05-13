@@ -18,7 +18,8 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) currentUser(w http.ResponseWriter, r *http.Request) {
-	user, err := h.service.CurrentUser(r.Context())
+	userID := r.Header.Get("X-User-ID")
+	user, err := h.service.CurrentUser(r.Context(), userID)
 	if err != nil {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "current user is unavailable")
 		return

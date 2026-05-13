@@ -38,15 +38,17 @@ func NewDependencies(cfg config.Config, log *zap.Logger, conn *sql.DB) *Dependen
 	smsProvider := smsfeature.NewProviderAdapter(smsplatform.NewNoopProvider(log))
 	reminderService := smsfeature.NewReminderService(smsRepository, smsProvider, auditService, log)
 
+	authService := auth.NewService(auth.NewRepository(conn))
+
 	return &Dependencies{
 		Config: cfg,
 		Logger: log,
 		DB:     conn,
 
-		AuthHandler:        auth.NewHandler(auth.NewService(auth.NewRepository(conn))),
+		AuthHandler:        auth.NewHandler(authService),
 		ClinicHandler:      clinics.NewHandler(clinics.NewService(clinics.NewRepository(conn))),
 		UserHandler:        users.NewHandler(users.NewService(users.NewRepository(conn))),
-		PatientHandler:     patients.NewHandler(patients.NewService(patients.NewRepository(conn), auditService)),
+		PatientHandler:     patients.NewHandler(patients.NewService(patients.NewRepository(conn), auditService), authService),
 		AppointmentHandler: appointments.NewHandler(appointments.NewService(appointments.NewRepository(conn), auditService)),
 		SMSHandler:         smsfeature.NewHandler(smsfeature.NewService(smsRepository, smsProvider, auditService)),
 		AuditHandler:       audit.NewHandler(auditService),

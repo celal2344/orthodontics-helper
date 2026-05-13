@@ -1,11 +1,11 @@
 # Implementation Plan
 
-## Current Constraints
+## Current Status
 
-- The repository is nearly empty, so the first milestone is scaffolding.
+- The repository has a working monorepo foundation, web shell, API scaffold, schema, OpenAPI contract, generated API client, clinic shell, and colleagues page.
 - Node and Bun are available locally.
-- Go is not installed locally, so backend code can be scaffolded but not compiled or run here yet.
-- Tests are intentionally skipped for now per request.
+- Go is installed locally through Scoop and API validation passes.
+- Some feature folders are scaffolded but not product-functional yet.
 - Work should be committed and pushed frequently.
 
 ## Skill Context
@@ -155,8 +155,8 @@ Completion criteria:
 6. OpenAPI spec v1 and API client package. - Completed in `138e0fd`.
 7. Auth shell and clinic context. - Completed in `b0e1ca5`.
 8. Colleagues page. - Completed in `ea2d5c2`.
-9. Patient backend scaffold. - Next.
-10. Patient table and modal.
+9. Patient backend scaffold. - Completed: DB-backed patient list/get/create/update/soft-delete with request-scoped clinic resolution.
+10. Patient table and modal. - Next product-critical UI slice.
 11. Patient audit and soft delete scaffolding.
 12. Appointment backend scaffold.
 13. Appointment UI in modal.
