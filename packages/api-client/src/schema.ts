@@ -233,6 +233,9 @@ export interface components {
             status: components["schemas"]["PatientStatus"];
             treatmentNote?: string;
             internalNote?: string;
+            remindersEnabled: boolean;
+            reminderDaysBefore: number[];
+            reminderSendHour: number;
             /** Format: date-time */
             nextAppointment?: string;
             /** Format: date-time */
@@ -244,6 +247,9 @@ export interface components {
             status: components["schemas"]["PatientStatus"];
             treatmentNote?: string;
             internalNote?: string;
+            remindersEnabled?: boolean;
+            reminderDaysBefore?: number[];
+            reminderSendHour?: number;
         };
         PatientListResponse: {
             data: components["schemas"]["Patient"][];

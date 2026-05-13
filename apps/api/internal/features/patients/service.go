@@ -115,6 +115,16 @@ func validatePatientInput(input CreatePatientRequest) error {
 		return ErrInvalidInput
 	}
 
+	if normalizedReminderSendHour(input) < 0 || normalizedReminderSendHour(input) > 23 {
+		return ErrInvalidInput
+	}
+
+	for _, day := range normalizedReminderDaysBefore(input) {
+		if day < 0 {
+			return ErrInvalidInput
+		}
+	}
+
 	switch input.Status {
 	case "active_treatment", "completed", "cancelled", "waiting", "inactive":
 		return nil
@@ -123,15 +133,39 @@ func validatePatientInput(input CreatePatientRequest) error {
 	}
 }
 
+func normalizedRemindersEnabled(input CreatePatientRequest) bool {
+	if input.RemindersEnabled == nil {
+		return true
+	}
+	return *input.RemindersEnabled
+}
+
+func normalizedReminderDaysBefore(input CreatePatientRequest) []int {
+	if len(input.ReminderDaysBefore) == 0 {
+		return []int{1}
+	}
+	return input.ReminderDaysBefore
+}
+
+func normalizedReminderSendHour(input CreatePatientRequest) int {
+	if input.ReminderSendHour == nil {
+		return 9
+	}
+	return *input.ReminderSendHour
+}
+
 func patientResponse(patient Patient) PatientResponse {
 	response := PatientResponse{
-		ID:            patient.ID,
-		FullName:      patient.FullName,
-		Phone:         patient.Phone,
-		Status:        patient.Status,
-		TreatmentNote: patient.TreatmentNote,
-		InternalNote:  patient.InternalNote,
-		UpdatedAt:     patient.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		ID:                 patient.ID,
+		FullName:           patient.FullName,
+		Phone:              patient.Phone,
+		Status:             patient.Status,
+		TreatmentNote:      patient.TreatmentNote,
+		InternalNote:       patient.InternalNote,
+		RemindersEnabled:   patient.RemindersEnabled,
+		ReminderDaysBefore: patient.ReminderDaysBefore,
+		ReminderSendHour:   patient.ReminderSendHour,
+		UpdatedAt:          patient.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 
 	if patient.NextAppointment != nil {

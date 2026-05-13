@@ -323,7 +323,7 @@ components:
       enum: [active_treatment, completed, cancelled, waiting, inactive]
     Patient:
       type: object
-      required: [id, fullName, phone, status, updatedAt]
+      required: [id, fullName, phone, status, remindersEnabled, reminderDaysBefore, reminderSendHour, updatedAt]
       properties:
         id:
           type: string
@@ -338,6 +338,16 @@ components:
           type: string
         internalNote:
           type: string
+        remindersEnabled:
+          type: boolean
+        reminderDaysBefore:
+          type: array
+          items:
+            type: integer
+        reminderSendHour:
+          type: integer
+          minimum: 0
+          maximum: 23
         nextAppointment:
           type: string
           format: date-time
@@ -358,6 +368,16 @@ components:
           type: string
         internalNote:
           type: string
+        remindersEnabled:
+          type: boolean
+        reminderDaysBefore:
+          type: array
+          items:
+            type: integer
+        reminderSendHour:
+          type: integer
+          minimum: 0
+          maximum: 23
     PatientListResponse:
       type: object
       required: [data]

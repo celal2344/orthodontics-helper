@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -28,6 +29,9 @@ func (r *Repository) ListByClinic(ctx context.Context, clinicID string, search s
 			p.status,
 			p.treatment_note,
 			p.internal_note,
+			p.reminders_enabled,
+			array_to_string(p.reminder_days_before, ','),
+			p.reminder_send_hour,
 			coalesce(p.created_by_user_id::text, ''),
 			coalesce(p.updated_by_user_id::text, ''),
 			p.created_at,
@@ -84,6 +88,9 @@ func (r *Repository) GetByID(ctx context.Context, clinicID string, patientID str
 			p.status,
 			p.treatment_note,
 			p.internal_note,
+			p.reminders_enabled,
+			array_to_string(p.reminder_days_before, ','),
+			p.reminder_send_hour,
 			coalesce(p.created_by_user_id::text, ''),
 			coalesce(p.updated_by_user_id::text, ''),
 			p.created_at,
@@ -123,10 +130,13 @@ func (r *Repository) Create(ctx context.Context, clinicID string, actorUserID st
 			status,
 			treatment_note,
 			internal_note,
+			reminders_enabled,
+			reminder_days_before,
+			reminder_send_hour,
 			created_by_user_id,
 			updated_by_user_id
 		)
-		values ($1, $2, $3, $4, $5, $6, $7, $7)
+		values ($1, $2, $3, $4, $5, $6, $7, $8::int[], $9, $10, $10)
 		returning
 			id::text,
 			clinic_id::text,
@@ -135,6 +145,9 @@ func (r *Repository) Create(ctx context.Context, clinicID string, actorUserID st
 			status,
 			treatment_note,
 			internal_note,
+			reminders_enabled,
+			array_to_string(reminder_days_before, ','),
+			reminder_send_hour,
 			coalesce(created_by_user_id::text, ''),
 			coalesce(updated_by_user_id::text, ''),
 			created_at,
@@ -151,6 +164,9 @@ func (r *Repository) Create(ctx context.Context, clinicID string, actorUserID st
 		input.Status,
 		input.TreatmentNote,
 		input.InternalNote,
+		normalizedRemindersEnabled(input),
+		intArrayLiteral(normalizedReminderDaysBefore(input)),
+		normalizedReminderSendHour(input),
 		actorUserID,
 	))
 	if err != nil {
@@ -168,7 +184,10 @@ func (r *Repository) Update(ctx context.Context, clinicID string, actorUserID st
 			status = $5,
 			treatment_note = $6,
 			internal_note = $7,
-			updated_by_user_id = $8,
+			reminders_enabled = $8,
+			reminder_days_before = $9::int[],
+			reminder_send_hour = $10,
+			updated_by_user_id = $11,
 			updated_at = now()
 		where clinic_id = $1
 			and id = $2
@@ -181,6 +200,9 @@ func (r *Repository) Update(ctx context.Context, clinicID string, actorUserID st
 			status,
 			treatment_note,
 			internal_note,
+			reminders_enabled,
+			array_to_string(reminder_days_before, ','),
+			reminder_send_hour,
 			coalesce(created_by_user_id::text, ''),
 			coalesce(updated_by_user_id::text, ''),
 			created_at,
@@ -206,6 +228,9 @@ func (r *Repository) Update(ctx context.Context, clinicID string, actorUserID st
 		input.Status,
 		input.TreatmentNote,
 		input.InternalNote,
+		normalizedRemindersEnabled(input),
+		intArrayLiteral(normalizedReminderDaysBefore(input)),
+		normalizedReminderSendHour(input),
 		actorUserID,
 	))
 	if err != nil {
@@ -251,6 +276,7 @@ type patientScanner interface {
 
 func scanPatient(scanner patientScanner) (Patient, error) {
 	var patient Patient
+	var reminderDaysBefore sql.NullString
 	var nextAppointment sql.NullTime
 
 	if err := scanner.Scan(
@@ -261,6 +287,9 @@ func scanPatient(scanner patientScanner) (Patient, error) {
 		&patient.Status,
 		&patient.TreatmentNote,
 		&patient.InternalNote,
+		&patient.RemindersEnabled,
+		&reminderDaysBefore,
+		&patient.ReminderSendHour,
 		&patient.CreatedByUserID,
 		&patient.UpdatedByUserID,
 		&patient.CreatedAt,
@@ -273,6 +302,34 @@ func scanPatient(scanner patientScanner) (Patient, error) {
 	if nextAppointment.Valid {
 		patient.NextAppointment = &nextAppointment.Time
 	}
+	patient.ReminderDaysBefore = parseIntList(reminderDaysBefore.String)
 
 	return patient, nil
+}
+
+func parseIntList(value string) []int {
+	if strings.TrimSpace(value) == "" {
+		return []int{1}
+	}
+
+	parts := strings.Split(value, ",")
+	result := make([]int, 0, len(parts))
+	for _, part := range parts {
+		parsed, err := strconv.Atoi(strings.TrimSpace(part))
+		if err == nil && parsed >= 0 {
+			result = append(result, parsed)
+		}
+	}
+	if len(result) == 0 {
+		return []int{1}
+	}
+	return result
+}
+
+func intArrayLiteral(values []int) string {
+	parts := make([]string, 0, len(values))
+	for _, value := range values {
+		parts = append(parts, strconv.Itoa(value))
+	}
+	return "{" + strings.Join(parts, ",") + "}"
 }
