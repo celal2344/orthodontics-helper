@@ -15,6 +15,7 @@
       "dependencies": {
         "@orthodontics-helper/api-client": "workspace:*",
         "@orthodontics-helper/constants": "workspace:*",
+        "@orthodontics-helper/i18n": "workspace:*",
         "@tanstack/react-query": "^5.90.12",
         "@tanstack/react-table": "^8.21.3",
         "class-variance-authority": "^0.7.1",

@@ -35,6 +35,22 @@
   --radius: 0.5rem;
 }
 
+.dark {
+  --background: 222.2 47.4% 7%;
+  --foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --primary: 173 80% 38%;
+  --primary-foreground: 222.2 47.4% 7%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 50.6%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 173 80% 38%;
+}
+
 * {
   border-color: hsl(var(--border));
 }
