@@ -38,7 +38,18 @@ func NewDependencies(cfg config.Config, log *zap.Logger, conn *sql.DB) *Dependen
 	smsProvider := smsfeature.NewProviderAdapter(smsplatform.NewNoopProvider(log))
 	reminderService := smsfeature.NewReminderService(smsRepository, smsProvider, auditService, log)
 
-	authService := auth.NewService(auth.NewRepository(conn), cfg.SupabaseJWTSecret, cfg.SupabaseURL, cfg.SupabaseServiceRoleKey)
+	authService := auth.NewService(
+		auth.NewRepository(conn),
+		auth.TokenVerifierConfig{
+			JWTSecret:  cfg.SupabaseJWTSecret,
+			JWKSURL:    cfg.SupabaseJWKSURL,
+			Issuer:     cfg.SupabaseJWTIssuer,
+			Audience:   cfg.SupabaseJWTAudience,
+			Algorithms: cfg.SupabaseJWTAlgorithms,
+		},
+		cfg.SupabaseURL,
+		cfg.SupabaseServiceRoleKey,
+	)
 
 	return &Dependencies{
 		Config: cfg,

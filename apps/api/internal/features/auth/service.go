@@ -3,27 +3,66 @@ package auth
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rsa"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type Service struct {
 	repository             *Repository
-	supabaseJWTSecret      string
+	tokenVerifier          TokenVerifierConfig
 	supabaseURL            string
 	supabaseServiceRoleKey string
+	jwksCache              *jwksCache
 }
 
-func NewService(repository *Repository, supabaseJWTSecret string, supabaseURL string, supabaseServiceRoleKey string) *Service {
+type TokenVerifierConfig struct {
+	JWTSecret  string
+	JWKSURL    string
+	Issuer     string
+	Audience   string
+	Algorithms []string
+}
+
+type jwksCache struct {
+	mu        sync.Mutex
+	keys      map[string]any
+	expiresAt time.Time
+}
+
+type jwksDocument struct {
+	Keys []jwk `json:"keys"`
+}
+
+type jwk struct {
+	KeyID     string `json:"kid"`
+	KeyType   string `json:"kty"`
+	Algorithm string `json:"alg"`
+	Curve     string `json:"crv"`
+	Use       string `json:"use"`
+	N         string `json:"n"`
+	E         string `json:"e"`
+	X         string `json:"x"`
+	Y         string `json:"y"`
+}
+
+func NewService(repository *Repository, tokenVerifier TokenVerifierConfig, supabaseURL string, supabaseServiceRoleKey string) *Service {
 	return &Service{
 		repository:             repository,
-		supabaseJWTSecret:      supabaseJWTSecret,
+		tokenVerifier:          tokenVerifier,
 		supabaseURL:            strings.TrimRight(supabaseURL, "/"),
 		supabaseServiceRoleKey: supabaseServiceRoleKey,
+		jwksCache:              &jwksCache{},
 	}
 }
 
@@ -95,16 +134,22 @@ func (s *Service) UpdatePassword(ctx context.Context, user *SessionUser, input U
 }
 
 func (s *Service) verifyToken(tokenString string) (string, error) {
-	if s.supabaseJWTSecret == "" {
+	if s.tokenVerifier.JWKSURL == "" && s.tokenVerifier.JWTSecret == "" {
 		return "", ErrUnauthorized
 	}
 
-	token, err := jwt.ParseWithClaims(tokenString, jwt.MapClaims{}, func(token *jwt.Token) (any, error) {
-		if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
-			return nil, ErrUnauthorized
-		}
-		return []byte(s.supabaseJWTSecret), nil
-	})
+	parserOptions := []jwt.ParserOption{}
+	if len(s.tokenVerifier.Algorithms) > 0 {
+		parserOptions = append(parserOptions, jwt.WithValidMethods(s.tokenVerifier.Algorithms))
+	}
+	if s.tokenVerifier.Issuer != "" {
+		parserOptions = append(parserOptions, jwt.WithIssuer(s.tokenVerifier.Issuer))
+	}
+	if s.tokenVerifier.Audience != "" {
+		parserOptions = append(parserOptions, jwt.WithAudience(s.tokenVerifier.Audience))
+	}
+
+	token, err := jwt.ParseWithClaims(tokenString, jwt.MapClaims{}, s.keyfunc, parserOptions...)
 	if err != nil || !token.Valid {
 		return "", ErrUnauthorized
 	}
@@ -120,6 +165,140 @@ func (s *Service) verifyToken(tokenString string) (string, error) {
 	}
 
 	return sub, nil
+}
+
+func (s *Service) keyfunc(token *jwt.Token) (any, error) {
+	if s.tokenVerifier.JWKSURL != "" {
+		keyID, _ := token.Header["kid"].(string)
+		if keyID == "" {
+			return nil, ErrUnauthorized
+		}
+
+		keys, err := s.cachedJWKSKeys()
+		if err != nil {
+			return nil, err
+		}
+
+		key, ok := keys[keyID]
+		if !ok {
+			s.expireJWKS()
+			keys, err = s.cachedJWKSKeys()
+			if err != nil {
+				return nil, err
+			}
+			key, ok = keys[keyID]
+			if !ok {
+				return nil, ErrUnauthorized
+			}
+		}
+
+		return key, nil
+	}
+
+	if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
+		return nil, ErrUnauthorized
+	}
+	return []byte(s.tokenVerifier.JWTSecret), nil
+}
+
+func (s *Service) cachedJWKSKeys() (map[string]any, error) {
+	s.jwksCache.mu.Lock()
+	defer s.jwksCache.mu.Unlock()
+
+	if len(s.jwksCache.keys) > 0 && time.Now().Before(s.jwksCache.expiresAt) {
+		return s.jwksCache.keys, nil
+	}
+
+	request, err := http.NewRequest(http.MethodGet, s.tokenVerifier.JWKSURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, fmt.Errorf("fetch jwks: %s", response.Status)
+	}
+
+	var document jwksDocument
+	if err := json.NewDecoder(response.Body).Decode(&document); err != nil {
+		return nil, err
+	}
+
+	keys := make(map[string]any, len(document.Keys))
+	for _, key := range document.Keys {
+		publicKey, err := key.publicKey()
+		if err != nil {
+			return nil, err
+		}
+		keys[key.KeyID] = publicKey
+	}
+
+	s.jwksCache.keys = keys
+	s.jwksCache.expiresAt = time.Now().Add(10 * time.Minute)
+	return keys, nil
+}
+
+func (s *Service) expireJWKS() {
+	s.jwksCache.mu.Lock()
+	defer s.jwksCache.mu.Unlock()
+	s.jwksCache.expiresAt = time.Time{}
+}
+
+func (key jwk) publicKey() (any, error) {
+	switch key.KeyType {
+	case "RSA":
+		return key.rsaPublicKey()
+	case "EC":
+		return key.ecdsaPublicKey()
+	default:
+		return nil, fmt.Errorf("unsupported jwk key type: %s", key.KeyType)
+	}
+}
+
+func (key jwk) rsaPublicKey() (*rsa.PublicKey, error) {
+	modulusBytes, err := decodeBase64URLUInt(key.N)
+	if err != nil {
+		return nil, err
+	}
+	exponentBytes, err := decodeBase64URLUInt(key.E)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rsa.PublicKey{
+		N: new(big.Int).SetBytes(modulusBytes),
+		E: int(new(big.Int).SetBytes(exponentBytes).Int64()),
+	}, nil
+}
+
+func (key jwk) ecdsaPublicKey() (*ecdsa.PublicKey, error) {
+	if key.Curve != "P-256" {
+		return nil, fmt.Errorf("unsupported jwk curve: %s", key.Curve)
+	}
+
+	xBytes, err := decodeBase64URLUInt(key.X)
+	if err != nil {
+		return nil, err
+	}
+	yBytes, err := decodeBase64URLUInt(key.Y)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ecdsa.PublicKey{
+		Curve: elliptic.P256(),
+		X:     new(big.Int).SetBytes(xBytes),
+		Y:     new(big.Int).SetBytes(yBytes),
+	}, nil
+}
+
+func decodeBase64URLUInt(value string) ([]byte, error) {
+	return base64.RawURLEncoding.DecodeString(value)
 }
 
 func (s *Service) updateSupabaseUser(ctx context.Context, userID string, payload map[string]any) error {
