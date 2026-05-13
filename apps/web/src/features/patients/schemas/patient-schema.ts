@@ -7,6 +7,11 @@ export const patientSchema = z.object({
   status: z.enum(patientStatuses),
   treatmentNote: z.string().optional(),
   internalNote: z.string().optional(),
+  remindersEnabled: z.boolean(),
+  reminderDaysBefore: z
+    .array(z.number().int().min(0))
+    .min(1, "At least one reminder day is required"),
+  reminderSendHour: z.number().int().min(0).max(23),
 });
 
 export type PatientFormValues = z.infer<typeof patientSchema>;

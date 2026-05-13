@@ -4,6 +4,7 @@ import type { Patient } from "@orthodontics-helper/api-client";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { useI18n } from "@/components/layout/i18n-provider";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import { PatientTable } from "@/features/patients/components/patient-table";
 import { usePatients } from "@/features/patients/hooks/use-patients";
 
 export function PatientsPage() {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [modalMode, setModalMode] = useState<PatientModalMode>("create");
   const [selectedPatient, setSelectedPatient] = useState<Patient | undefined>();
@@ -38,18 +40,18 @@ export function PatientsPage() {
         action={
           <Button onClick={() => openModal(undefined, "create")}>
             <Plus data-icon="inline-start" aria-hidden="true" />
-            Add patient
+            {t("patients.addPatient")}
           </Button>
         }
-        description="Clinic-scoped patient records, appointments, reminders, and audit history."
-        title="Patients"
+        description={t("patients.description")}
+        title={t("patients.title")}
       />
 
       <Input
-        aria-label="Search patients"
+        aria-label={t("patients.search")}
         className="md:max-w-sm"
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search by name or phone"
+        placeholder={t("patients.searchPlaceholder")}
         value={query}
       />
 
@@ -60,14 +62,12 @@ export function PatientsPage() {
         <PatientTable
           patients={patientsQuery.data}
           onOpen={(patient, mode) => openModal(patient, mode)}
-          onSendSMS={(patient) => openModal(patient, "sms")}
         />
       ) : null}
 
       <PatientModal
         mode={modalMode}
         onClose={() => setModalOpen(false)}
-        onModeChange={setModalMode}
         open={modalOpen}
         patient={selectedPatient}
       />

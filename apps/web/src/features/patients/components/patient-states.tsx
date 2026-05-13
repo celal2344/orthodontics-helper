@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18n } from "@/components/layout/i18n-provider";
 import {
   Card,
   CardContent,
@@ -7,11 +10,13 @@ import {
 } from "@/components/ui/card";
 
 export function PatientTableLoading() {
+  const { t } = useI18n();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Patient list</CardTitle>
-        <CardDescription>Loading patients</CardDescription>
+        <CardTitle>{t("patients.tableTitle")}</CardTitle>
+        <CardDescription>{t("patients.loading")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-48 rounded-md bg-secondary" />
@@ -21,15 +26,17 @@ export function PatientTableLoading() {
 }
 
 export function PatientTableError() {
+  const { t } = useI18n();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Patient list</CardTitle>
-        <CardDescription>Unable to load patients</CardDescription>
+        <CardTitle>{t("patients.tableTitle")}</CardTitle>
+        <CardDescription>{t("patients.loadError")}</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          Confirm the API is running and the active user belongs to a clinic.
+          {t("patients.loadErrorBody")}
         </p>
       </CardContent>
     </Card>
@@ -37,15 +44,17 @@ export function PatientTableError() {
 }
 
 export function PatientTableEmpty() {
+  const { t } = useI18n();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Patient list</CardTitle>
-        <CardDescription>No patients yet</CardDescription>
+        <CardTitle>{t("patients.tableTitle")}</CardTitle>
+        <CardDescription>{t("patients.empty")}</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          Add the first patient to start tracking appointments and reminders.
+          {t("patients.emptyBody")}
         </p>
       </CardContent>
     </Card>
