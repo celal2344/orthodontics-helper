@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -30,7 +31,7 @@ func Load() Config {
 
 	return Config{
 		AppEnv:                 getEnv("APP_ENV", "development"),
-		HTTPAddr:               getEnv("HTTP_ADDR", ":8080"),
+		HTTPAddr:               httpAddr(),
 		DatabaseURL:            os.Getenv("DATABASE_URL"),
 		JWTSecret:              os.Getenv("JWT_SECRET"),
 		SupabaseURL:            os.Getenv("SUPABASE_URL"),
@@ -60,6 +61,16 @@ func getEnv(key string, fallback string) string {
 		return fallback
 	}
 	return value
+}
+
+func httpAddr() string {
+	if value := os.Getenv("HTTP_ADDR"); value != "" {
+		return value
+	}
+	if value := os.Getenv("PORT"); value != "" {
+		return fmt.Sprintf(":%s", value)
+	}
+	return ":8080"
 }
 
 func splitCSV(value string) []string {

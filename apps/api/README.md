@@ -28,7 +28,14 @@ Current validation status:
 ./app send-daily-reminders
 ```
 
-Railway should run the API service with `./app server` and the daily cron service with `./app send-daily-reminders`.
+Railway should deploy this service with:
+
+- Root Directory: `/apps/api`
+- Config File Path: `/apps/api/railway.json`
+- Build Command: `go build -o app ./cmd/api`
+- Start Command: `./app server`
+
+The API reads Railway's `PORT` automatically when `HTTP_ADDR` is not set. A future daily cron service can reuse the same build output and run `./app send-daily-reminders`.
 
 ## Database
 
