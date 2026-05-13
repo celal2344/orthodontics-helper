@@ -32,10 +32,10 @@ Railway should deploy this service with:
 
 - Root Directory: `/apps/api`
 - Config File Path: `/apps/api/railway.json`
-- Build Command: `go build -o app ./cmd/api`
-- Start Command: `./app server`
+- Builder: Dockerfile
+- Dockerfile Path: `Dockerfile`
 
-The API reads Railway's `PORT` automatically when `HTTP_ADDR` is not set. A future daily cron service can reuse the same build output and run `./app send-daily-reminders`.
+The API reads Railway's `PORT` automatically when `HTTP_ADDR` is not set. A root-level Dockerfile and `railway.json` also exist as a fallback if Railway scans the repository root instead of `/apps/api`. A future daily cron service can reuse the same image and run `/app/api send-daily-reminders`.
 
 ## Database
 
