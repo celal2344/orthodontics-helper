@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- The repository has a working monorepo foundation, web shell, API scaffold, schema, OpenAPI contract, generated API client, clinic shell, and colleagues page.
+- The repository has a working monorepo foundation, web shell, API scaffold, schema, OpenAPI contract, generated API client, clinic shell, colleagues page, DB-backed patient API, and query-backed patient UI.
 - Node and Bun are available locally.
-- Go is installed locally through Scoop and API validation passes.
-- Some feature folders are scaffolded but not product-functional yet.
+- Go is installed locally through Scoop; previous API validation passed, but the latest local revalidation hit the Go module issue noted below.
+- Patient management is now the first product-functional vertical slice, with remaining appointment, SMS, and audit read flows still staged behind placeholders.
 - Work should be committed and pushed frequently.
 
 ## Skill Context
@@ -92,6 +92,11 @@ Completion criteria:
 - Patient UI flow is present and wired to the API client boundary.
 - Backend scaffolding shows clinic-scoped access and soft delete behavior.
 
+Status:
+
+- Completed: patient list/search query hook, table states, patient table, shared create/view/edit/SMS modal, create/update/delete mutations, and backend audit writes for patient mutations.
+- Deferred: appointment CRUD inside the modal, real SMS template send flow, and audit history read UI.
+
 ### M5: Appointment Management Vertical Slice
 
 - Scaffold appointment repository/service/handler in Go.
@@ -155,10 +160,10 @@ Completion criteria:
 6. OpenAPI spec v1 and API client package. - Completed in `138e0fd`.
 7. Auth shell and clinic context. - Completed in `b0e1ca5`.
 8. Colleagues page. - Completed in `ea2d5c2`.
-9. Patient backend scaffold. - Completed: DB-backed patient list/get/create/update/soft-delete with request-scoped clinic resolution.
-10. Patient table and modal. - Next product-critical UI slice.
-11. Patient audit and soft delete scaffolding.
-12. Appointment backend scaffold.
+9. Patient backend scaffold. - Completed in `6c3c4a0`: DB-backed patient list/get/create/update/soft-delete with request-scoped clinic resolution.
+10. Patient table and modal. - Completed: query-backed patient page, table states, shared modal, and create/update/delete mutations.
+11. Patient audit and soft delete scaffolding. - Completed for write-side patient audit logs; read-side history UI remains in M8.
+12. Appointment backend scaffold. - Next product-critical slice.
 13. Appointment UI in modal.
 14. Calendar page.
 15. SMS template backend and UI.
@@ -180,4 +185,5 @@ For now, implementation proceeds OpenAPI-first with backend scaffolding and fron
 
 - `supabase migration list --local --workdir apps/api` currently fails because no local Supabase Postgres is running on `127.0.0.1:54322`.
 - Go was installed through Scoop (`go1.26.3 windows/amd64`).
-- API validation now passes: `go test ./...`, `go vet ./...`, and `go build ./cmd/api`.
+- API validation passed after Go install in the patient backend slice: `go test ./...`, `go vet ./...`, and `go build ./cmd/api`.
+- During the patient UI slice, frontend validation passed (`bun.cmd run typecheck`, `bun.cmd run lint`, `bun.cmd run build`). A later API revalidation attempt on local `go1.26.3 windows/amd64` reported `cannot find package` for external module imports (`pgx`, `zap`) despite `go list -m all` resolving modules; no API files were changed in that slice.
