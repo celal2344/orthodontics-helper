@@ -60,6 +60,11 @@ export function AppShell({
     return () => document.removeEventListener("mousedown", closeProfileMenu);
   }, []);
 
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur md:px-6">
@@ -173,7 +178,7 @@ export function AppShell({
                       <Settings aria-hidden="true" />
                       {t("nav.settings")}
                     </Link>
-                    <Button className="h-9 justify-start px-2" variant="ghost">
+                    <Button className="h-9 justify-start px-2" variant="ghost" onClick={logout}>
                       <LogOut aria-hidden="true" />
                       {t("nav.logout")}
                     </Button>

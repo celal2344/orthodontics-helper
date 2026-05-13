@@ -28,6 +28,46 @@ paths:
                 $ref: "#/components/schemas/CurrentUser"
         "401":
           $ref: "#/components/responses/Error"
+  /v1/auth/profile:
+    patch:
+      operationId: updateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileInput"
+      responses:
+        "200":
+          description: Updated current user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+  /v1/auth/password:
+    post:
+      operationId: updatePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePasswordInput"
+      responses:
+        "200":
+          description: Password updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
   /v1/clinics/current:
     get:
       operationId: getCurrentClinic
@@ -50,6 +90,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ColleagueListResponse"
+  /v1/clinic-members:
+    post:
+      operationId: createClinicMember
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClinicMemberInput"
+      responses:
+        "201":
+          description: Created clinic member.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Colleague"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
   /v1/patients:
     get:
       operationId: listPatients
@@ -269,6 +329,13 @@ components:
               type: string
             message:
               type: string
+    SuccessResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
     CurrentUser:
       type: object
       required: [id, email, fullName, clinicId]
@@ -284,6 +351,22 @@ components:
         clinicId:
           type: string
           format: uuid
+    UpdateProfileInput:
+      type: object
+      required: [fullName, email]
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+    UpdatePasswordInput:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          minLength: 8
     Clinic:
       type: object
       required: [id, name]
@@ -318,6 +401,18 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Colleague"
+    CreateClinicMemberInput:
+      type: object
+      required: [fullName, email, temporaryPassword]
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        temporaryPassword:
+          type: string
+          minLength: 8
     PatientStatus:
       type: string
       enum: [active_treatment, completed, cancelled, waiting, inactive]

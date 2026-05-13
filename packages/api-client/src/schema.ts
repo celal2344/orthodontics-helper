@@ -36,6 +36,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/auth/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateProfile"];
+        trace?: never;
+    };
+    "/v1/auth/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["updatePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/clinics/current": {
         parameters: {
             query?: never;
@@ -62,6 +94,22 @@ export interface paths {
         get: operations["listColleagues"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/clinic-members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createClinicMember"];
         delete?: never;
         options?: never;
         head?: never;
@@ -196,6 +244,10 @@ export interface components {
                 message: string;
             };
         };
+        SuccessResponse: {
+            /** @enum {boolean} */
+            success: true;
+        };
         CurrentUser: {
             /** Format: uuid */
             id: string;
@@ -204,6 +256,14 @@ export interface components {
             fullName: string;
             /** Format: uuid */
             clinicId: string;
+        };
+        UpdateProfileInput: {
+            fullName: string;
+            /** Format: email */
+            email: string;
+        };
+        UpdatePasswordInput: {
+            password: string;
         };
         Clinic: {
             /** Format: uuid */
@@ -222,6 +282,12 @@ export interface components {
         };
         ColleagueListResponse: {
             data: components["schemas"]["Colleague"][];
+        };
+        CreateClinicMemberInput: {
+            fullName: string;
+            /** Format: email */
+            email: string;
+            temporaryPassword: string;
         };
         /** @enum {string} */
         PatientStatus: "active_treatment" | "completed" | "cancelled" | "waiting" | "inactive";
@@ -381,6 +447,58 @@ export interface operations {
             401: components["responses"]["Error"];
         };
     };
+    updateProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileInput"];
+            };
+        };
+        responses: {
+            /** @description Updated current user. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CurrentUser"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+        };
+    };
+    updatePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePasswordInput"];
+            };
+        };
+        responses: {
+            /** @description Password updated. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuccessResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+        };
+    };
     getCurrentClinic: {
         parameters: {
             query?: never;
@@ -420,6 +538,32 @@ export interface operations {
                     "application/json": components["schemas"]["ColleagueListResponse"];
                 };
             };
+        };
+    };
+    createClinicMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateClinicMemberInput"];
+            };
+        };
+        responses: {
+            /** @description Created clinic member. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Colleague"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
         };
     };
     listPatients: {

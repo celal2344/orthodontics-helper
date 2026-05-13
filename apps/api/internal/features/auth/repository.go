@@ -43,3 +43,35 @@ func (r *Repository) FindSessionUser(ctx context.Context, userID string) (*Sessi
 
 	return &user, nil
 }
+
+func (r *Repository) UpdateUser(ctx context.Context, userID string, fullName string, email string) (*SessionUser, error) {
+	const query = `
+		update public.users
+		set full_name = $2,
+			email = $3,
+			updated_at = now()
+		where id = $1
+		returning id::text, email, full_name
+	`
+
+	var user SessionUser
+	if err := r.db.QueryRowContext(ctx, query, userID, fullName, email).Scan(
+		&user.ID,
+		&user.Email,
+		&user.FullName,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrUnauthorized
+		}
+		return nil, fmt.Errorf("update user: %w", err)
+	}
+
+	sessionUser, err := r.FindSessionUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	sessionUser.Email = user.Email
+	sessionUser.FullName = user.FullName
+	return sessionUser, nil
+}

@@ -1,6 +1,5 @@
 import type { SendManualSMSInput, SMSTemplate } from "@orthodontics-helper/api-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useClinicContext } from "@/features/auth/components/clinic-context-provider";
 import { apiClient } from "@/lib/api/client";
 
 export const defaultSMSTemplates: SMSTemplate[] = [
@@ -27,27 +26,18 @@ export const defaultSMSTemplates: SMSTemplate[] = [
   },
 ];
 
-function useClinicApiClient() {
-  const { user } = useClinicContext();
-  return apiClient.withHeaders({ "X-User-ID": user.id });
-}
-
 export function useSMSTemplates() {
-  const client = useClinicApiClient();
-
   return useQuery({
     queryKey: ["sms-templates"],
     queryFn: async () => {
-      const templates = await client.listSMSTemplates();
+      const templates = await apiClient.listSMSTemplates();
       return templates.length > 0 ? templates : defaultSMSTemplates;
     },
   });
 }
 
 export function useSendManualSMS() {
-  const client = useClinicApiClient();
-
   return useMutation({
-    mutationFn: (input: SendManualSMSInput) => client.sendManualSMS(input),
+    mutationFn: (input: SendManualSMSInput) => apiClient.sendManualSMS(input),
   });
 }

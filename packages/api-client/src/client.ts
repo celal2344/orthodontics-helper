@@ -13,6 +13,9 @@ export type SMSTemplate = components["schemas"]["SMSTemplate"];
 export type SendManualSMSInput = components["schemas"]["SendManualSMSInput"];
 export type SendSMSResponse = components["schemas"]["SendSMSResponse"];
 export type AuditLog = components["schemas"]["AuditLog"];
+export type UpdateProfileInput = components["schemas"]["UpdateProfileInput"];
+export type UpdatePasswordInput = components["schemas"]["UpdatePasswordInput"];
+export type CreateClinicMemberInput = components["schemas"]["CreateClinicMemberInput"];
 
 export class ApiClientError extends Error {
   code: string;
@@ -48,6 +51,20 @@ export class ApiClient {
     return this.request<CurrentUser>("/v1/auth/me");
   }
 
+  updateProfile(input: UpdateProfileInput) {
+    return this.request<CurrentUser>("/v1/auth/profile", {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  }
+
+  updatePassword(input: UpdatePasswordInput) {
+    return this.request<{ success: boolean }>("/v1/auth/password", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  }
+
   getCurrentClinic() {
     return this.request<Clinic>("/v1/clinics/current");
   }
@@ -55,6 +72,13 @@ export class ApiClient {
   async listColleagues() {
     const response = await this.request<{ data: Colleague[] }>("/v1/colleagues");
     return response.data;
+  }
+
+  createClinicMember(input: CreateClinicMemberInput) {
+    return this.request<Colleague>("/v1/clinic-members", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
   }
 
   async listPatients(query?: string) {
@@ -121,6 +145,7 @@ export class ApiClient {
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...init,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...this.defaultHeaders,

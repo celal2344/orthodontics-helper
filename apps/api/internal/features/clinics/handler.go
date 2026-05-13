@@ -3,14 +3,17 @@ package clinics
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/celal2344/orthodontics-helper/apps/api/internal/features/auth"
 )
 
 type Handler struct {
-	service *Service
+	service     *Service
+	authService *auth.Service
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, authService *auth.Service) *Handler {
+	return &Handler{service: service, authService: authService}
 }
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
@@ -18,7 +21,13 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) currentClinic(w http.ResponseWriter, r *http.Request) {
-	clinic, err := h.service.CurrentClinic(r.Context())
+	user, err := h.authService.AuthenticateRequest(r)
+	if err != nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"success": false})
+		return
+	}
+
+	clinic, err := h.service.CurrentClinic(r.Context(), user.ClinicID)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"success": false})
 		return

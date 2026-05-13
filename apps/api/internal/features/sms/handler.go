@@ -3,14 +3,17 @@ package sms
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/celal2344/orthodontics-helper/apps/api/internal/features/auth"
 )
 
 type Handler struct {
-	service *Service
+	service     *Service
+	authService *auth.Service
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, authService *auth.Service) *Handler {
+	return &Handler{service: service, authService: authService}
 }
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
@@ -19,7 +22,12 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) listTemplates(w http.ResponseWriter, r *http.Request) {
-	templates, err := h.service.ListTemplates(r.Context(), "clinic_demo")
+	user, ok := h.authenticate(w, r)
+	if !ok {
+		return
+	}
+
+	templates, err := h.service.ListTemplates(r.Context(), user.ClinicID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "SMS_TEMPLATE_LIST_FAILED", "list sms templates failed")
 		return
@@ -29,6 +37,10 @@ func (h *Handler) listTemplates(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) sendManual(w http.ResponseWriter, r *http.Request) {
+	if _, ok := h.authenticate(w, r); !ok {
+		return
+	}
+
 	var request SendManualSMSRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid sms payload")
@@ -42,6 +54,16 @@ func (h *Handler) sendManual(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusCreated, response)
+}
+
+func (h *Handler) authenticate(w http.ResponseWriter, r *http.Request) (*auth.SessionUser, bool) {
+	user, err := h.authService.AuthenticateRequest(r)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "current user is unavailable")
+		return nil, false
+	}
+
+	return user, true
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {

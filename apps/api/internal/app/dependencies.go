@@ -38,7 +38,7 @@ func NewDependencies(cfg config.Config, log *zap.Logger, conn *sql.DB) *Dependen
 	smsProvider := smsfeature.NewProviderAdapter(smsplatform.NewNoopProvider(log))
 	reminderService := smsfeature.NewReminderService(smsRepository, smsProvider, auditService, log)
 
-	authService := auth.NewService(auth.NewRepository(conn))
+	authService := auth.NewService(auth.NewRepository(conn), cfg.SupabaseJWTSecret, cfg.SupabaseURL, cfg.SupabaseServiceRoleKey)
 
 	return &Dependencies{
 		Config: cfg,
@@ -46,12 +46,12 @@ func NewDependencies(cfg config.Config, log *zap.Logger, conn *sql.DB) *Dependen
 		DB:     conn,
 
 		AuthHandler:        auth.NewHandler(authService),
-		ClinicHandler:      clinics.NewHandler(clinics.NewService(clinics.NewRepository(conn))),
-		UserHandler:        users.NewHandler(users.NewService(users.NewRepository(conn))),
+		ClinicHandler:      clinics.NewHandler(clinics.NewService(clinics.NewRepository(conn)), authService),
+		UserHandler:        users.NewHandler(users.NewService(users.NewRepository(conn), cfg.SupabaseURL, cfg.SupabaseServiceRoleKey), authService),
 		PatientHandler:     patients.NewHandler(patients.NewService(patients.NewRepository(conn), auditService), authService),
-		AppointmentHandler: appointments.NewHandler(appointments.NewService(appointments.NewRepository(conn), auditService)),
-		SMSHandler:         smsfeature.NewHandler(smsfeature.NewService(smsRepository, smsProvider, auditService)),
-		AuditHandler:       audit.NewHandler(auditService),
+		AppointmentHandler: appointments.NewHandler(appointments.NewService(appointments.NewRepository(conn), auditService), authService),
+		SMSHandler:         smsfeature.NewHandler(smsfeature.NewService(smsRepository, smsProvider, auditService), authService),
+		AuditHandler:       audit.NewHandler(auditService, authService),
 		ReminderService:    reminderService,
 	}
 }

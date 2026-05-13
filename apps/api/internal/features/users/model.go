@@ -2,6 +2,14 @@ package users
 
 import "time"
 
+type Colleague struct {
+	ID       string
+	FullName string
+	Email    string
+	Clinic   string
+	JoinedAt time.Time
+}
+
 type User struct {
 	ID        string
 	Email     string
