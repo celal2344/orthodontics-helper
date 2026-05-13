@@ -179,3 +179,5 @@ For now, implementation proceeds OpenAPI-first with backend scaffolding and fron
 ## Validation Notes
 
 - `supabase migration list --local --workdir apps/api` currently fails because no local Supabase Postgres is running on `127.0.0.1:54322`.
+- Go was installed through Scoop (`go1.26.3 windows/amd64`).
+- API validation now passes: `go test ./...`, `go vet ./...`, and `go build ./cmd/api`.
