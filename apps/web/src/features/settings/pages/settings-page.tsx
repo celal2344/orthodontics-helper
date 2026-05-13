@@ -1,5 +1,8 @@
+"use client";
+
 import { Bell, Clock, MessageSquareText } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { useI18n } from "@/components/layout/i18n-provider";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,12 +16,14 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function SettingsPage() {
+  const { t } = useI18n();
+
   return (
     <AppShell currentPath="/settings">
       <PageHeader
-        action={<Button>Save settings</Button>}
-        description="Reminder templates and daily notification preferences."
-        title="Settings"
+        action={<Button>{t("settings.save")}</Button>}
+        description={t("settings.description")}
+        title={t("settings.title")}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -27,21 +32,21 @@ export function SettingsPage() {
             <CardTitle>
               <span className="inline-flex items-center gap-2">
                 <Bell aria-hidden="true" />
-                Reminders
+                {t("settings.reminders")}
               </span>
             </CardTitle>
-            <CardDescription>Daily cron configuration</CardDescription>
+            <CardDescription>{t("settings.remindersDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <label className="flex flex-col gap-2 text-sm font-medium">
-              Days before appointment
+              {t("settings.daysBeforeAppointment")}
               <Input defaultValue="1, 7" />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
-              Send hour
+              {t("settings.sendHour")}
               <Input defaultValue="06:00" />
             </label>
-            <Badge>Enabled</Badge>
+            <Badge>{t("common.enabled")}</Badge>
           </CardContent>
         </Card>
 
@@ -50,30 +55,34 @@ export function SettingsPage() {
             <CardTitle>
               <span className="inline-flex items-center gap-2">
                 <MessageSquareText aria-hidden="true" />
-                SMS templates
+                {t("settings.smsTemplates")}
               </span>
             </CardTitle>
-            <CardDescription>Template-based messages only</CardDescription>
+            <CardDescription>{t("settings.smsTemplatesDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
             <div className="rounded-md border p-4">
               <div className="mb-3 flex items-center justify-between gap-2">
-                <p className="font-medium">Appointment reminder</p>
-                <Badge>Enabled</Badge>
+                <p className="font-medium">{t("settings.appointmentReminder")}</p>
+                <Badge>{t("common.enabled")}</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Merhaba {"{patientName}"}, {"{date}"} saat {"{time}"} tarihinde
-                randevunuz bulunmaktadir.
+                {t("settings.appointmentReminderBody", {
+                  patientName: "{patientName}",
+                  date: "{date}",
+                  time: "{time}",
+                })}
               </p>
             </div>
             <div className="rounded-md border p-4">
               <div className="mb-3 flex items-center justify-between gap-2">
-                <p className="font-medium">Manual reminder</p>
-                <Badge>Enabled</Badge>
+                <p className="font-medium">{t("settings.manualReminder")}</p>
+                <Badge>{t("common.enabled")}</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Merhaba {"{patientName}"}, randevu bilginiz icin kliniginizle
-                iletisime gecebilirsiniz.
+                {t("settings.manualReminderBody", {
+                  patientName: "{patientName}",
+                })}
               </p>
             </div>
           </CardContent>
@@ -85,10 +94,10 @@ export function SettingsPage() {
           <CardTitle>
             <span className="inline-flex items-center gap-2">
               <Clock aria-hidden="true" />
-              Reminder job
+              {t("settings.reminderJob")}
             </span>
           </CardTitle>
-          <CardDescription>Railway cron command</CardDescription>
+          <CardDescription>{t("settings.reminderJobDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <code className="rounded-md bg-secondary px-3 py-2 text-sm">
